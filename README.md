@@ -1,2 +1,2 @@
-# Pkmn-pmd-quiz
+# Pkmn icebreaker
 Quiz for pkmn dnd party
