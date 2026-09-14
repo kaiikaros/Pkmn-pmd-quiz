@@ -147,7 +147,7 @@ function submitQuiz() {
 
     // 4. Send secret payload to DM via Discord Webhook
     // REPLACE THIS STRING WITH YOUR PRIVATE DISCORD WEBHOOK URL!
-    const webhookUrl = "https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEhttps://discord.com/api/webhooks/1549032761501814835/U5HpO45TbdUdd0h6nHQXt3yjmG4uMOMBaKvN6Ct0olmuJz_iywfaMYkedAn0vsPzyutaN";
+    const webhookUrl = "https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKENhttps://discord.com/api/webhooks/1549032761501814835/U5HpO45TbdUdd0h6nHQXt3yjmG4uMOMBaKvN6Ct0olmuJz_iywfaMYkedAn0vsPzyuta";
 
     const payload = {
         content: `🎮 **New Campaign Icebreaker Submitted!**\n` +
