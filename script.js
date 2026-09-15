@@ -462,24 +462,34 @@ const answerScores = {
     q15: { A: {}, B: {}, C: {}, D: {} }
 };
 
-function submitQuiz() {
-    const nameElement = document.getElementById("player-name");
-    if (!nameElement || !nameElement.value) {
-        alert("Please enter your name first!");
+function submitQuiz(event) {
+    // 1. Prevent default page reload/reset on submission
+    if (event) event.preventDefault();
+
+    // 2. Target the HTML form and capture inputs
+    // MAKE SURE your <form> tag in index.html has id="quizForm"
+    const quizForm = document.getElementById('quizForm');
+    if (!quizForm) {
+        console.error("Form element '#quizForm' not found in DOM!");
         return;
     }
+    const formData = new FormData(quizForm);
 
-    let formElement = document.getElementById("icebreaker-form");
-    let formData = new FormData(formElement);
+    // Initialize scoring containers
     let natureScores = {};
-
+    
+    // 3. Loop through Questions 1-14 to calculate Nature Scores
     for (let i = 1; i <= 14; i++) {
         let answer = formData.get(`q${i}`);
+        
+        // Validation check for missing answers
         if (!answer) {
             alert(`Please answer Question ${i}!`);
-            continue;
+            return;
         }
-        let scores = answerScores[`q${i}`][answer];
+
+        // Add scores from answerScores object mapping
+        let scores = answerScores[`q${i}`] ? answerScores[`q${i}`][answer] : null;
         if (scores) {
             for (let nature in scores) {
                 natureScores[nature] = (natureScores[nature] || 0) + scores[nature];
@@ -487,40 +497,68 @@ function submitQuiz() {
         }
     }
 
-    let q15ClassTag = formData.get("q15");
-    if (!q15ClassTag) {
+    // 4. Determine Highest-Scoring Nature
+    let assignedNature = "";
+    let maxScore = -1;
+    
+    for (let nature in natureScores) {
+        if (natureScores[nature] > maxScore) {
+            maxScore = natureScores[nature];
+            assignedNature = nature;
+        }
+    }
+
+    // 5. Read Question 15 (Class Tag and Habitat Tag selection)
+    let q15Answer = formData.get('q15');
+    if (!q15Answer) {
         alert("Please answer Question 15!");
         return;
     }
 
-    let highestScore = -1;
-    let winningNature = "Hardy";
-    for (let nature in natureScores) {
-        if (natureScores[nature] > highestScore) {
-            highestScore = natureScores[nature];
-            winningNature = nature;
+    // Assuming Q15 answer gives class and habitat tags (e.g. "A_B", "C_D")
+    // Adjust splitting logic here if your Q15 value format differs
+    let [assignedClassTag, assignedHabitatTag] = q15Answer.split('_');
+
+    // 6. Filter Candidates from the 434-species Database (pokemonDatabase array)
+    // Primary Filter: Match Assigned Nature
+    let candidateList = pokemonDatabase.filter(pkmn => 
+        pkmn.nature.toLowerCase() === assignedNature.toLowerCase()
+    );
+
+    // Secondary Filter (Tiebreakers): Try matching Class AND Habitat
+    let exactMatches = candidateList.filter(pkmn => 
+        pkmn.classTag === assignedClassTag && pkmn.habitatTag === assignedHabitatTag
+    );
+
+    let finalPokemon = null;
+
+    if (exactMatches.length > 0) {
+        // Pick random from exact matches
+        finalPokemon = exactMatches[Math.floor(Math.random() * exactMatches.length)];
+    } else {
+        // Soft Fallback: Match Class OR Habitat tag
+        let partialMatches = candidateList.filter(pkmn => 
+            pkmn.classTag === assignedClassTag || pkmn.habitatTag === assignedHabitatTag
+        );
+
+        if (partialMatches.length > 0) {
+            finalPokemon = partialMatches[Math.floor(Math.random() * partialMatches.length)];
+        } else if (candidateList.length > 0) {
+            // Fallback: Pick any candidate matching the nature
+            finalPokemon = candidateList[Math.floor(Math.random() * candidateList.length)];
+        } else {
+            // Hard Fallback: Random overall if nature has no entries
+            finalPokemon = pokemonDatabase[Math.floor(Math.random() * pokemonDatabase.length)];
         }
     }
 
-    let candidates = pokemonDatabase.filter(p => p.nature === winningNature);
-    let finalPokemon;
+    // 7. Inject Calculated Results into Hidden Formspree Inputs
+    let natureInput = document.getElementById('assigned_nature_input');
+    let pokemonInput = document.getElementById('assigned_pokemon_input');
 
-    if (candidates.length > 0) {
-        let classMatches = candidates.filter(p => p.classTag === q15ClassTag);
-        finalPokemon = classMatches.length > 0 ? classMatches[0] : candidates[0];
-    } else {
-        finalPokemon = pokemonDatabase[0] || { name: "Eevee", nature: winningNature };
-    }
+    if (natureInput) natureInput.value = assignedNature;
+    if (pokemonInput) pokemonInput.value = finalPokemon.name;
 
-    let natureInput = document.getElementById("secret-nature") || document.createElement("input");
-    natureInput.type = "hidden"; natureInput.name = "Assigned_Nature"; natureInput.id = "secret-nature";
-    natureInput.value = winningNature;
-    formElement.appendChild(natureInput);
-
-    let pokemonInput = document.getElementById("secret-pokemon") || document.createElement("input");
-    pokemonInput.type = "hidden"; pokemonInput.name = "Assigned_Pokemon"; pokemonInput.id = "secret-pokemon";
-    pokemonInput.value = finalPokemon.name;
-    formElement.appendChild(pokemonInput);
-
-    formElement.submit();
+    // 8. Submit Form to Formspree
+    quizForm.submit();
 }

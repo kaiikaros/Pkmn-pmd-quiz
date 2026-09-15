@@ -141,7 +141,7 @@
             <p>Welcome! Before we kick off Session 1, please complete this quick 15-question survey as I set stuff up.</p>
         </div>
 
-        <form id="icebreaker-form" action="https://formspree.io/f/meaqyzqj" method="POST"></form>
+        <form id="quizForm" action="https://formspree.io/f/meaqyzqj" method="POST"></form>
             <!-- Player Name -->
             <div class="question-card">
                 <div class="input-group">
@@ -284,6 +284,8 @@
                 <label class="option-label"><input type="radio" name="q15" value="C"> C) The Navigator: You have the map app open, watching for traffic jams, spot-checking speed traps, and scouting cool side stops ahead of time.</label>
                 <label class="option-label"><input type="radio" name="q15" value="D"> D) You like to make sure everything goes as planned, making sure food is available, the car is good and the hotel rooms are booked.</label>
             </div>
+                <input type="hidden" name="Assigned_Nature" id="assigned_nature_input">
+                <input type="hidden" name="Assigned_Pokemon" id="assigned_pokemon_input">
 
             <button type="button" class="submit-btn" onclick="submitQuiz()">Submit</button>
         </form>
