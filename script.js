@@ -477,7 +477,7 @@ function submitQuiz() {
         let answer = formData.get(`q${i}`);
         if (!answer) {
             alert(`Please answer Question ${i}!`);
-            return;
+            continue;
         }
         let scores = answerScores[`q${i}`][answer];
         if (scores) {
